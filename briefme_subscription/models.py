@@ -1,4 +1,8 @@
+import calendar
 import datetime
+
+from dateutil.parser import parse
+from decimal import Decimal, DecimalException
 
 from django.db import models
 
@@ -62,3 +66,36 @@ class TrialCoupon(TimeStampedModel):
             duration = self.number_of_days
 
         return duration
+
+###################################################################################################
+# Field post-process functions                                                                    #
+###################################################################################################
+def parse_date(string):
+    try:
+        return parse(string)
+    except (TypeError, ValueError):
+        return ""
+
+
+def expiration_last_day(credit_card):
+    expiration_year = int(credit_card["expiration_year"])
+    expiration_month = int(credit_card["expiration_month"])
+
+    last_day = calendar.monthrange(expiration_year, expiration_month)[1]
+    return datetime.date(expiration_year, expiration_month, last_day)
+
+
+def convert_price(price):
+    try:
+        return Decimal(price) / 100
+    except (DecimalException, TypeError):
+        return Decimal("0")
+
+
+def lower(string):
+    return string.lower()
+
+
+###################################################################################################
+# End field post-process functions                                                                #
+###################################################################################################
