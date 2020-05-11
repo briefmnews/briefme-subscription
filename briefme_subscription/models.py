@@ -4,6 +4,7 @@ import datetime
 from dateutil.parser import parse
 from decimal import Decimal, DecimalException
 
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from model_utils.models import TimeStampedModel
@@ -99,3 +100,105 @@ def lower(string):
 ###################################################################################################
 # End field post-process functions                                                                #
 ###################################################################################################
+
+class ChargifySubscription(TimeStampedModel):
+    """
+    Subscription model build upon Chargify API & online services.
+
+    As it is historically designed to replace `TriaSubscription` and
+    `RecurlySubscription` it may carry behavioral relics of from these
+    classes instead of strictly following Chargify's logic.
+    """
+
+    # Should be "id" but conflicts with Django's "pk", so we use "uuid" even
+    # though it is not a real UUID value but an integer.
+    uuid = models.PositiveIntegerField(unique=True)
+    chargify_subscription_cache = JSONField(default=dict, blank=True)
+    hold_start_date = models.DateField("Date de suspension", null=True, blank=True)
+    hold_end_date = models.DateField("Date de reprise", null=True, blank=True)
+    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
+    def __getattribute__(self, item):
+        try:
+            return super().__getattribute__(item)
+        except AttributeError as e:
+            try:
+                return getattr(self.chargify_subscription, item)
+            except AttributeError:
+                raise e
+
+    def __str__(self):
+        if self.trialing:
+            value = "{state} - date de fin: {end} - coupon: {coupon}".format(
+                state=self.state,
+                end=self.trial_ended_at.strftime("%d/%m/%Y"),
+                coupon=self.trial_coupon.codename,
+            )
+        else:
+            value = "{state} - ID: {id}".format(state=self.state, id=self.uuid)
+        return value
+
+    class ChargifyProxy:
+
+        attribute_lookup = {
+            "balance": ("balance_in_cents", convert_price),
+            "canceled_at": ("canceled_at", parse_date),
+            "coupon_code": "coupon_code",
+            "credit_card": "credit_card",
+            "credit_card_expiration_date": ("credit_card", expiration_last_day),
+            "credit_card_masked_card_number": "credit_card__masked_card_number",
+            "current_billing_amount": ("current_billing_amount_in_cents", convert_price),
+            "current_billing_amount_in_cents": "current_billing_amount_in_cents",
+            "current_period_ends_at": ("current_period_ends_at", parse_date),
+            "customer": "customer",
+            "next_assessment_at": ("next_assessment_at", parse_date),
+            "next_product_id": "next_product_id",
+            "next_product_handle": "next_product_handle",
+            "payment_collection_method": "payment_collection_method",
+            "payment_type": "payment_type",
+            "paypal_account": "paypal_account",
+            "paypal_email": "paypal_account__paypal_email",
+            "pending_cancellation": "cancel_at_end_of_period",
+            "product": "product",
+            "product_handle": "product__handle",
+            "product_price": ("product__price_in_cents", convert_price),
+            "state": "state",
+            "trial_ended_at": ("trial_ended_at", parse_date),
+            "plan_interval_unit": "product__interval_unit",
+            "plan_interval_length": "product__interval",
+            "plan_name": ("product__name", lower),
+            "plan_handle": ("product__handle", lower),
+        }
+
+        def __init__(self, chargify_subscription):
+            self._chargify_subscription = chargify_subscription
+
+        def __getattribute__(self, item):
+            try:
+                return super().__getattribute__(item)
+            except AttributeError as e:
+                if item in self.attribute_lookup:
+                    lookup = self.attribute_lookup[item]
+                    if isinstance(lookup, str):
+                        return self._get_value_from_dict(lookup, self._chargify_subscription)
+                    elif isinstance(lookup, tuple):
+                        value = self._get_value_from_dict(lookup[0], self._chargify_subscription)
+                        if callable(lookup[1]):
+                            value = lookup[1](value)
+                        return value
+                else:
+                    raise e
+
+        @staticmethod
+        def _get_value_from_dict(key, subscription):
+            keys = key.split("__")
+            value = subscription
+            try:
+                for key in keys:
+                    value = value.get(key)
+                return value if value is not None else ""
+            except AttributeError:
+                return ""
