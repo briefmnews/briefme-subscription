@@ -184,7 +184,48 @@ class ChargifySubscription(TimeStampedModel):
         else:
             return self.remaining_days_in_current_period
 
-    
+    @property
+    def active(self):
+        return self.state == self.STATES.active
+
+    @property
+    def trialing(self):
+        return self.state == self.STATES.trialing
+
+    @property
+    def trial_ended(self):
+        """To check if the status is trial ended
+
+        @return: The state trial ended
+        @rtype : bool
+        """
+        return self.state == self.STATES.trial_ended
+
+    @property
+    def canceled(self):
+        return self.state == self.STATES.canceled
+
+    @property
+    def on_hold(self):
+        """To check if the status is on hold
+
+        @return: The state on hold
+        @rtype : bool
+        """
+        return self.state == self.STATES.on_hold
+
+    @property
+    def past_due(self):
+        """To check if the status is past due
+
+        @return: The state is past due
+        @rtype : bool
+        """
+        return self.state == self.STATES.past_due
+
+    @property
+    def pending_cancellation(self):
+        return self.chargify_subscription.pending_cancellation or False
 
     class ChargifyProxy:
 
