@@ -119,6 +119,8 @@ class ChargifySubscription(TimeStampedModel):
     hold_end_date = models.DateField("Date de reprise", null=True, blank=True)
     user = models.ForeignKey("users.User", on_delete=models.CASCADE)
 
+    chargify_helper = None
+
     class Meta:
         abstract = True
 
@@ -226,6 +228,18 @@ class ChargifySubscription(TimeStampedModel):
     @property
     def pending_cancellation(self):
         return self.chargify_subscription.pending_cancellation or False
+
+    def refresh_chargify_subscription_cache(self, chargify_subscription=None):
+        self.chargify_subscription_cache = (
+            chargify_subscription or self.chargify_helper.get_subscription(self.uuid)
+        )
+        if not self.chargify_subscription_cache:
+            self.chargify_subscription_cache = {}
+        self.save()
+
+    def clear_chargify_subscription_cache(self):
+        self.chargify_subscription_cache = {}
+        self.save()
 
     class ChargifyProxy:
 
