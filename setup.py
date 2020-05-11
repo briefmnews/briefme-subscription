@@ -10,11 +10,7 @@ setup(
     license="None",
     packages=["briefme_subscription"],
     python_requires=">=3.7",
-    install_requires=[
-        "Django>=2.2",
-        "django-model-utils>=3",
-        "python-dateutil>=2.8"
-    ],
+    install_requires=["Django>=2.2", "django-model-utils>=3", "python-dateutil>=2.8"],
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",

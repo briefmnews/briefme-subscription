@@ -69,6 +69,7 @@ class TrialCoupon(TimeStampedModel):
 
         return duration
 
+
 ###################################################################################################
 # Field post-process functions                                                                    #
 ###################################################################################################
@@ -101,6 +102,7 @@ def lower(string):
 ###################################################################################################
 # End field post-process functions                                                                #
 ###################################################################################################
+
 
 class ChargifySubscription(TimeStampedModel):
     """
@@ -250,7 +252,10 @@ class ChargifySubscription(TimeStampedModel):
             "credit_card": "credit_card",
             "credit_card_expiration_date": ("credit_card", expiration_last_day),
             "credit_card_masked_card_number": "credit_card__masked_card_number",
-            "current_billing_amount": ("current_billing_amount_in_cents", convert_price),
+            "current_billing_amount": (
+                "current_billing_amount_in_cents",
+                convert_price,
+            ),
             "current_billing_amount_in_cents": "current_billing_amount_in_cents",
             "current_period_ends_at": ("current_period_ends_at", parse_date),
             "customer": "customer",
@@ -283,9 +288,13 @@ class ChargifySubscription(TimeStampedModel):
                 if item in self.attribute_lookup:
                     lookup = self.attribute_lookup[item]
                     if isinstance(lookup, str):
-                        return self._get_value_from_dict(lookup, self._chargify_subscription)
+                        return self._get_value_from_dict(
+                            lookup, self._chargify_subscription
+                        )
                     elif isinstance(lookup, tuple):
-                        value = self._get_value_from_dict(lookup[0], self._chargify_subscription)
+                        value = self._get_value_from_dict(
+                            lookup[0], self._chargify_subscription
+                        )
                         if callable(lookup[1]):
                             value = lookup[1](value)
                         return value
