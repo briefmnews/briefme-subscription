@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 from model_utils.models import TimeStampedModel
+from model_utils import Choices
 
 from .managers import TrialCouponManager
 
@@ -140,6 +141,50 @@ class ChargifySubscription(TimeStampedModel):
         else:
             value = "{state} - ID: {id}".format(state=self.state, id=self.uuid)
         return value
+
+    @property
+    def STATES(self):
+        args = self.chargify_helper.STATES
+        return Choices(*args)
+
+    @staticmethod
+    def count_days_from_now(to_date):
+        try:
+            to_date = to_date.replace(tzinfo=None)
+        except (AttributeError, TypeError):
+            return 0
+        from_date = datetime.datetime.now()
+
+        if not to_date or to_date <= from_date:
+            return 0
+        delta = to_date - from_date
+        return delta.days
+
+    @property
+    def remaining_trial_days(self):
+        """Get the number of days before the end of the trial"""
+        try:
+            return self.count_days_from_now(self.trial_ended_at)
+        except AttributeError:
+            return 0
+
+    @property
+    def remaining_days_in_current_period(self):
+        """Get the number of days before the end of the current period"""
+        try:
+            return self.count_days_from_now(self.current_period_ends_at)
+        except AttributeError:
+            return 0
+
+    @property
+    def remaining_days(self):
+        """Get the number of days before next change in subscription"""
+        if self.trialing or self.trial_ended:
+            return self.remaining_trial_days
+        else:
+            return self.remaining_days_in_current_period
+
+    
 
     class ChargifyProxy:
 
