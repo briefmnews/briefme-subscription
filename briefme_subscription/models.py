@@ -229,7 +229,9 @@ class ChargifySubscription(TimeStampedModel):
 
     def refresh_chargify_subscription_cache(self, chargify_subscription=None):
         self.chargify_subscription_cache = (
-            chargify_subscription or self.chargify_helper.get_subscription(self.uuid)
+            chargify_subscription
+            or self.chargify_helper.get_subscription(self.uuid)
+            or {}
         )
         if not self.chargify_subscription_cache:
             self.chargify_subscription_cache = {}
