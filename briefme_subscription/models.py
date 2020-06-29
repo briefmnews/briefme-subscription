@@ -107,10 +107,6 @@ def lower(string):
 class ChargifySubscription(TimeStampedModel):
     """
     Subscription model build upon Chargify API & online services.
-
-    As it is historically designed to replace `TriaSubscription` and
-    `RecurlySubscription` it may carry behavioral relics of from these
-    classes instead of strictly following Chargify's logic.
     """
 
     # Should be "id" but conflicts with Django's "pk", so we use "uuid" even
