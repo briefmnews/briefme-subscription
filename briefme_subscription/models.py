@@ -62,7 +62,7 @@ class TrialCoupon(TimeStampedModel):
     @property
     def duration(self):
         if self.expires_at:
-            delta_days = (self.expires_at - datetime.date.today).days
+            delta_days = (self.expires_at - datetime.date.today()).days
             duration = delta_days if delta_days >= 0 else 0
         else:
             duration = self.number_of_days
