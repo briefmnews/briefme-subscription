@@ -343,6 +343,20 @@ class ChargifyHelper(object):
 
         return response.json()["statement"]
 
+    def get_subscription_transactions(self, subscription_id):
+        return [
+            t["transaction"]
+            for t in self.chargify_python.subscriptions.transactions(
+                subscription_id=subscription_id
+            )
+        ]
+
+    def get_transaction(self, transaction_id):
+        if transaction_id:
+            return self.chargify_python.transactions(transaction_id=transaction_id)[
+                "transaction"
+            ]
+
     def get_customer_by_reference(self, user_id):
         """
         Read the Customer by Reference Value
