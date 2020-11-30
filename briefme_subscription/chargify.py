@@ -741,6 +741,14 @@ class ProductsDict(dict):
 
         return products
 
+    def get_by_id(self, product_id, default=None):
+        try:
+            return [p for _, p in PRODUCTS.items() if p["id"] == product_id][0]
+        except IndexError as e:
+            if default is not None:
+                return default
+            raise e
+
 
 # Instantiate a `ProductsDict` into PRODUCTS to make once instance
 # available anywhere via __import__.
