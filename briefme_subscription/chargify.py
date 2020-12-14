@@ -637,6 +637,20 @@ class ChargifyHelper(object):
         """
         self.chargify_python.subscriptions.retry.update(subscription_id=subscription_id)
 
+    def create_metadata(self, resource, resource_id, data):
+        """
+        Create Metadata
+        https://reference.chargify.com/v1/custom-fields-metadata/create-metadata
+        """
+        self.chargify_python.metadata.create(
+            resource=resource, resource_id=resource_id, data={"metadata": data}
+        )
+
+    def get_metadata_for_subscriber(self, subscription_id):
+        return self.chargify_python.subscriptions.metadata.read(
+            subscription_id=subscription_id
+        )["metadata"]
+
 
 class ProductsDict(dict):
     """
