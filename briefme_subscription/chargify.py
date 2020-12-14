@@ -673,20 +673,16 @@ class ProductsDict(dict):
 
         # If requiried attribute accesses the products' data and the object is
         # empty or data outdated, let's (re)load.
-        if (
-            args[0]
-            in (
-                "get",
-                "keys",
-                "items",
-                "values",
-                "paying",
-                "trial",
-                "__str__",
-                "__str__",
-            )
-            and (not self.last_update or self._is_outdated())
-        ):
+        if args[0] in (
+            "get",
+            "keys",
+            "items",
+            "values",
+            "paying",
+            "trial",
+            "__str__",
+            "__str__",
+        ) and (not self.last_update or self._is_outdated()):
             self._load()
 
         return super().__getattribute__(*args, **kwargs)
