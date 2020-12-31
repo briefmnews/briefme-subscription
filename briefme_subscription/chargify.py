@@ -651,6 +651,15 @@ class ChargifyHelper(object):
             subscription_id=subscription_id
         )["metadata"]
 
+    def purge_subscription(self, subscription_id, customer_id):
+        """
+        Remove a subscription in chargify. This works on live site because Chargify activated for us.
+        https://reference.chargify.com/v1/subscriptions/purge-subscription
+        """
+        self.chargify_python.subscriptions.purge.create(
+            subscription_id=subscription_id, qs_params={"ack": customer_id}
+        )
+
 
 class ProductsDict(dict):
     """
