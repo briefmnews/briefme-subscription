@@ -1,4 +1,5 @@
 import datetime
+import logging
 from hashlib import sha1
 import hmac
 import urllib.request, urllib.parse, urllib.error
@@ -10,6 +11,8 @@ import requests
 
 from libs.chargify_python import ChargifyNotFoundError, ChargifyUnprocessableEntityError
 from nonce.models import Nonce
+
+logger = logging.getLogger(__name__)
 
 
 def get_chargify_python():
@@ -195,8 +198,9 @@ class ChargifyHelper(object):
                 subscription_id=user.current_subscription.uuid, data=data
             )
             return subscription["subscription"]
-        except ChargifyUnprocessableEntityError:
-            return None
+        except ChargifyUnprocessableEntityError as e:
+            logger.error(f"Cannot update subscription: {e}")
+            raise ChargifyException(f"Cannot update subscription: {e}")
 
     def get_subscriptions_by_customer_id(self, customer_id):
         """
