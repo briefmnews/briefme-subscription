@@ -197,7 +197,7 @@ class ChargifyHelper(object):
             subscription = self.chargify_python.subscriptions.update(
                 subscription_id=user.current_subscription.uuid, data=data
             )
-            return subscription["subscription"]
+            return subscription
         except ChargifyUnprocessableEntityError as e:
             logger.error(f"Cannot update subscription: {e}")
             raise ChargifyException(f"Cannot update subscription: {e}")
