@@ -8,7 +8,7 @@ setup(
     author="Brief.me",
     author_email="tech@brief.me",
     license="None",
-    packages=["briefme_subscription"],
+    packages=["briefme_subscription", "briefme_subscription.views"],
     python_requires=">=3.7",
     install_requires=["Django>=2.2", "django-model-utils>=3", "python-dateutil>=2.8"],
     classifiers=[
