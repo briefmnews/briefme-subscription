@@ -458,11 +458,13 @@ class ChargifyHelper(object):
                 raise e
 
     def cancel_pending_cancellation(self, subscription_id):
+        """
+        Remove delayed cancel
 
-        self.chargify_python.subscriptions.update(
-            subscription_id=subscription_id,
-            data={"subscription": {"cancel_at_end_of_period": False}},
-        )
+        https://reference.chargify.com/v1/subscriptions-cancellations/cancel-subscription
+        """
+
+        self.chargify_python.subscriptions.delayed_cancel.delete(subscription_id=subscription_id)
 
     def reactivate_subscription(self, subscription_id, **qs):
         response = self.chargify_python.subscriptions.reactivate.update(
@@ -640,6 +642,24 @@ class ChargifyHelper(object):
         https://reference.chargify.com/v1/subscriptions-payment-methods-retries-balance-reset/retry-subscription
         """
         self.chargify_python.subscriptions.retry.update(subscription_id=subscription_id)
+
+    def create_migration(self, subscription_id, product_handle):
+        """
+        Migrate a subscription from one product to another
+        https://reference.chargify.com/v1/subscriptions-product-changes-migrations-upgrades-downgrades/create-migration#create-migration
+        """
+        data = {
+            "migration": {
+                "product_handle": product_handle,
+                "include_trial": False,
+                "include_initial_charge": False,
+                "include_coupons": False,
+                "preserve_period": False,
+            }
+        }
+        self.chargify_python.subscriptions.migrations.create(
+            subscription_id=subscription_id, data=data
+        )
 
     def create_metadata(self, resource, resource_id, data):
         """
