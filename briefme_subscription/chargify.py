@@ -464,7 +464,9 @@ class ChargifyHelper(object):
         https://reference.chargify.com/v1/subscriptions-cancellations/cancel-subscription
         """
 
-        self.chargify_python.subscriptions.delayed_cancel.delete(subscription_id=subscription_id)
+        self.chargify_python.subscriptions.delayed_cancel.delete(
+            subscription_id=subscription_id
+        )
 
     def reactivate_subscription(self, subscription_id, **qs):
         response = self.chargify_python.subscriptions.reactivate.update(
