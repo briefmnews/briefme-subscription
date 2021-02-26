@@ -176,7 +176,7 @@ class ChargifyHelper(object):
 
         if expires_at:
             data = {"subscription": {"expires_at": expires_at.isoformat()}}
-            subscription = self.chargify_python.subscriptions.override.update(
+            self.chargify_python.subscriptions.override.update(
                 subscription_id=subscription_id, data=data
             )
 
