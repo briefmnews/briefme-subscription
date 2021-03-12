@@ -366,12 +366,9 @@ class ChargifyHelper(object):
         Read the Customer by Reference Value
         https://reference.chargify.com/v1/customers/read-the-customer-by-reference-value
         """
-        try:
-            return self.chargify_python.customers.lookup.read(
-                qs_params={"reference": user_id}
-            )["customer"]
-        except ChargifyNotFoundError:
-            return None
+        return self.chargify_python.customers.lookup.read(
+            qs_params={"reference": user_id}
+        )["customer"]
 
     def get_coupon(self, code):
         res = requests.get(
