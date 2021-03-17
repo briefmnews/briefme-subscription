@@ -274,6 +274,7 @@ class ChargifySubscription(TimeStampedModel):
             "plan_interval_length": "product__interval",
             "plan_name": ("product__name", lower),
             "plan_handle": ("product__handle", lower),
+            "total_revenue": ("total_revenue_in_cents", convert_price),
         }
 
         def __init__(self, chargify_subscription):
