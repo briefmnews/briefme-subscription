@@ -34,10 +34,11 @@ class TrialCoupon(TimeStampedModel):
     token = models.SlugField(
         unique=True, verbose_name="Code promo", help_text="Exemple: BRIEF2020"
     )
-    verbose_name = models.CharField(
+    welcome_message = models.CharField(
         max_length=200,
-        verbose_name="Nom public",
-        help_text="Exemple: un abonnement à vie",
+        verbose_name="Message personnalisé accueil + e-mail",
+        blank=True,
+        null=True,
     )
     landing_message = models.CharField(
         max_length=200,
