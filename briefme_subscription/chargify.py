@@ -147,7 +147,7 @@ class ChargifyHelper(object):
         coupon_code=None,
         next_billing_at=None,
         expires_at=None,
-        chargify_token=None,
+        credit_card_attributes=None,
     ):
         """
         Subscribe Chargify `account` to a subscription corresponding to
@@ -165,9 +165,9 @@ class ChargifyHelper(object):
             data["subscription"].update(
                 {"next_billing_at": next_billing_at.isoformat()}
             )
-        if chargify_token:
+        if credit_card_attributes:
             data["subscription"].update(
-                {"credit_card_attributes": {"chargify_token": chargify_token}}
+                {"credit_card_attributes": credit_card_attributes}
             )
 
         subscription = self.chargify_python.subscriptions.create(data=data)
