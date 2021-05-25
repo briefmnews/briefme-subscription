@@ -10,7 +10,12 @@ setup(
     license="None",
     packages=["briefme_subscription", "briefme_subscription.views"],
     python_requires=">=3.7",
-    install_requires=["Django>=2.2", "django-model-utils>=3", "python-dateutil>=2.8"],
+    install_requires=[
+        "analytics-python>=1.3.0,<2",
+        "Django>=2.2,<3",
+        "django-model-utils>=4,<5",
+        "python-dateutil>=2.8,<3",
+    ],
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",
@@ -21,6 +26,8 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     include_package_data=True,
     zip_safe=False,
