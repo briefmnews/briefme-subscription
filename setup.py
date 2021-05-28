@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="briefme-subscription",
-    version="3.1.0",
+    version="3.2.0",
     description="Base subscription app for Brief.me projects",
     url="https://github.com/briefmnews/briefme-subscrition",
     author="Brief.me",
@@ -12,14 +12,15 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "analytics-python>=1.3.0,<2",
-        "Django>=2.2,<3",
+        "Django>=2.2,<4",
         "django-model-utils>=4,<5",
         "python-dateutil>=2.8,<3",
     ],
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",
-        "Framework :: Django :: 2.2",
+        "Framework :: Django :: 2",
+        "Framework :: Django :: 3",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
