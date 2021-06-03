@@ -11,6 +11,7 @@ from django.db import models
 from model_utils.models import TimeStampedModel
 from model_utils import Choices
 
+from .chargify import ChargifyHelper
 from .managers import TrialCouponManager
 
 User = get_user_model()
@@ -121,7 +122,7 @@ class ChargifySubscription(TimeStampedModel):
     hold_end_date = models.DateField("Date de reprise", null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    chargify_helper = None
+    chargify_helper = ChargifyHelper()
 
     class Meta:
         abstract = True
@@ -145,6 +146,14 @@ class ChargifySubscription(TimeStampedModel):
         else:
             value = "{state} - ID: {id}".format(state=self.state, id=self.uuid)
         return value
+
+    @property
+    def chargify_subscription(self):
+        if not self.chargify_subscription_cache:
+            # load the subscription and copy to cache
+            self.refresh_chargify_subscription_cache()
+        chargify_proxy = self.ChargifyProxy(self.chargify_subscription_cache)
+        return chargify_proxy
 
     @property
     def STATES(self):
@@ -244,6 +253,24 @@ class ChargifySubscription(TimeStampedModel):
     def clear_chargify_subscription_cache(self):
         self.chargify_subscription_cache = {}
         self.save()
+
+    def reactivate(self, include_trial=False, send_event=True):
+        previous_state = self.state
+        # include_trial should be set to 0 or 1
+        include_trial = 1 if include_trial else 0
+        response = self.chargify_helper.reactivate_subscription(
+            subscription_id=self.uuid, include_trial=include_trial
+        )
+        self.refresh_chargify_subscription_cache(chargify_subscription=response["subscription"])
+
+        if send_event and previous_state != self.STATES.trial_ended:
+            self.track_reactivate_event()
+
+    def track_conversion_event(self, additional_properties=None):
+        pass
+
+    def track_reactivate_event(self, additional_properties=None):
+        pass
 
     class ChargifyProxy:
 
