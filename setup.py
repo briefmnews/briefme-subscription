@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="briefme-subscription",
-    version="3.2.1",
+    version="3.3.0",
     description="Base subscription app for Brief.me projects",
     url="https://github.com/briefmnews/briefme-subscrition",
     author="Brief.me",
