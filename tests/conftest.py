@@ -21,7 +21,9 @@ def mock_chargify_helper(mocker):
 def get_chargify_subscription(mocker, filename):
     with open(filename) as f:
         chargify_subscription = json.load(f)
-    return mocker.patch.object(ChargifyHelper, "get_subscription", return_value=chargify_subscription)
+    return mocker.patch.object(
+        ChargifyHelper, "get_subscription", return_value=chargify_subscription
+    )
 
 
 @pytest.fixture
@@ -33,12 +35,9 @@ def subscription_with_state(mocker, state):
         "trial_ended",
         "canceled",
     ]
-    get_chargify_subscription(
-        mocker, f"tests/fixtures/{state}_subscription.json"
-    )
+    get_chargify_subscription(mocker, f"tests/fixtures/{state}_subscription.json")
 
     subscription = ChargifySubscriptionFactory(user=UserFactory())
     subscription.refresh_chargify_subscription_cache()
 
     return subscription
-

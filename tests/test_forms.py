@@ -1,6 +1,9 @@
 import pytest
 
-from briefme_subscription.chargify import ChargifyHelper, ChargifyUnprocessableEntityError
+from briefme_subscription.chargify import (
+    ChargifyHelper,
+    ChargifyUnprocessableEntityError,
+)
 from briefme_subscription.forms import ChargifyUpdateCustomerForm, ChargifyJsPaymentForm
 
 pytestmark = pytest.mark.django_db()
@@ -10,7 +13,13 @@ class TestChargifyUpdateCustomerForm:
     @pytest.mark.parametrize("payment_method", ["credit_card", "paypal"])
     def test_form_works(self, payment_method):
         # GIVEN
-        data = {"first_name": "john", "last_name": "doe", "payment_method": payment_method, "country": "FR", "zip": "75000"}
+        data = {
+            "first_name": "john",
+            "last_name": "doe",
+            "payment_method": payment_method,
+            "country": "FR",
+            "zip": "75000",
+        }
 
         # WHEN
         form = ChargifyUpdateCustomerForm(data=data)
@@ -20,7 +29,13 @@ class TestChargifyUpdateCustomerForm:
 
     def test_form_with_invalid_payment_choice(self):
         # GIVEN
-        data = {"first_name": "john", "last_name": "doe", "payment_method": "dummy", "country": "FR", "zip": "75000"}
+        data = {
+            "first_name": "john",
+            "last_name": "doe",
+            "payment_method": "dummy",
+            "country": "FR",
+            "zip": "75000",
+        }
 
         # WHEN
         form = ChargifyUpdateCustomerForm(data=data)
@@ -31,7 +46,13 @@ class TestChargifyUpdateCustomerForm:
 
     def test_form_with_invalid_country(self):
         # GIVEN
-        data = {"first_name": "john", "last_name": "doe", "payment_method": "dummy", "country": "france", "zip": "75000"}
+        data = {
+            "first_name": "john",
+            "last_name": "doe",
+            "payment_method": "dummy",
+            "country": "france",
+            "zip": "75000",
+        }
 
         # WHEN
         form = ChargifyUpdateCustomerForm(data=data)
@@ -57,7 +78,13 @@ class TestChargifyUpdateCustomerForm:
 
     def test_form_with_blank_fields(self):
         # GIVEN
-        data = {"first_name": "", "last_name": "", "payment_method": "", "country": "", "zip": ""}
+        data = {
+            "first_name": "",
+            "last_name": "",
+            "payment_method": "",
+            "country": "",
+            "zip": "",
+        }
 
         # WHEN
         form = ChargifyUpdateCustomerForm(data=data)
@@ -81,11 +108,18 @@ class TestChargifyJsPaymentForm:
         request = {"user": subscription_with_state.user}
 
         # WHEN
-        form = ChargifyJsPaymentForm(data=data, request=request, current_subscription=subscription_with_state, payment_method="credit_card")
+        form = ChargifyJsPaymentForm(
+            data=data,
+            request=request,
+            current_subscription=subscription_with_state,
+            payment_method="credit_card",
+        )
 
         # THEN
         assert form.is_valid()
-        ChargifyHelper().create_default_payment_profile_from_token.assert_called_once_with(subscription_with_state, form.cleaned_data["chargify_token"])
+        ChargifyHelper().create_default_payment_profile_from_token.assert_called_once_with(
+            subscription_with_state, form.cleaned_data["chargify_token"]
+        )
         assert subscription_with_state.payment_collection_method == "automatic"
 
     @pytest.mark.usefixtures("mock_chargify_helper")
@@ -96,9 +130,15 @@ class TestChargifyJsPaymentForm:
         request = {"user": subscription_with_state.user}
 
         # WHEN
-        form = ChargifyJsPaymentForm(data=data, request=request, current_subscription=subscription_with_state,
-                                     payment_method="credit_card")
+        form = ChargifyJsPaymentForm(
+            data=data,
+            request=request,
+            current_subscription=subscription_with_state,
+            payment_method="credit_card",
+        )
 
         # THEN
         assert form.is_valid()
-        ChargifyHelper().reactivate_subscription.assert_called_once_with(subscription_id=subscription_with_state.uuid, include_trial=False)
+        ChargifyHelper().reactivate_subscription.assert_called_once_with(
+            subscription_id=subscription_with_state.uuid, include_trial=False
+        )

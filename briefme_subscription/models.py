@@ -261,7 +261,9 @@ class ChargifySubscription(TimeStampedModel):
         response = self.chargify_helper.reactivate_subscription(
             subscription_id=self.uuid, include_trial=include_trial
         )
-        self.refresh_chargify_subscription_cache(chargify_subscription=response["subscription"])
+        self.refresh_chargify_subscription_cache(
+            chargify_subscription=response["subscription"]
+        )
 
         if send_event and previous_state != self.STATES.trial_ended:
             self.track_reactivate_event()

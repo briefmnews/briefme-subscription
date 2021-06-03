@@ -40,4 +40,3 @@ class ChargifySubscriptionFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = ChargifySubscription
-
