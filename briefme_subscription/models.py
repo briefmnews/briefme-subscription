@@ -5,12 +5,15 @@ from dateutil.parser import parse
 from decimal import Decimal, DecimalException
 
 from django.contrib.postgres.fields import JSONField
+from django.contrib.auth import get_user_model
 from django.db import models
 
 from model_utils.models import TimeStampedModel
 from model_utils import Choices
 
 from .managers import TrialCouponManager
+
+User = get_user_model()
 
 
 class TrialCoupon(TimeStampedModel):
@@ -116,7 +119,7 @@ class ChargifySubscription(TimeStampedModel):
     chargify_subscription_cache = JSONField(default=dict, blank=True)
     hold_start_date = models.DateField("Date de suspension", null=True, blank=True)
     hold_end_date = models.DateField("Date de reprise", null=True, blank=True)
-    user = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     chargify_helper = None
 
