@@ -63,6 +63,10 @@ class ChargifyJsPaymentForm(forms.Form):
         if is_valid and current_state in ["trial_ended", "canceled"]:
             is_valid = self._reactivate_subscription()
 
+        if current_state in ["trial_ended", "trialing"]:
+            self.current_subscription.refresh_chargify_subscription_cache()
+            self.current_subscription.track_conversion_event()
+
         return is_valid
 
     def _create_payment_profile(self):
