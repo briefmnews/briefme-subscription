@@ -300,16 +300,22 @@ class ChargifyHelper(object):
             kwargs["per_page"] = 200
 
         while True:
-            invoices = self.chargify_python.invoices(**kwargs)
+            invoices = self.chargify_python.invoices(**kwargs)["invoices"]
             if not invoices:
                 break
             kwargs["page"] += 1
             yield invoices
 
-    def register_payment(self, invoice_id, amount_in_cents, memo=""):
+    def register_payment(self, invoice_id, amount, memo=""):
+        """
+        :param invoice_id: id on the invoice 
+        :param amount: in EUR
+        :param memo:
+        :return:
+        """
         self.chargify_python.invoices.payments.create(
             invoice_id=invoice_id,
-            data={"payment": {"amount_in_cents": amount_in_cents}, "memo": memo},
+            data={"payment": {"amount": amount, "memo": memo, }},
         )
 
     def get_subscription_statements(self, subscription_id):
