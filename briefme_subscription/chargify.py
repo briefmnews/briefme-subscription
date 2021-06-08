@@ -306,15 +306,15 @@ class ChargifyHelper(object):
             kwargs["page"] += 1
             yield invoices
 
-    def register_payment(self, invoice_id, amount, memo=""):
+    def register_payment(self, invoice_uid, amount, memo=""):
         """
-        :param invoice_id: id on the invoice 
+        :param invoice_uid: uid on the invoice
         :param amount: in EUR
         :param memo:
         :return:
         """
         self.chargify_python.invoices.payments.create(
-            invoice_id=invoice_id,
+            invoice_uid=invoice_uid,
             data={"payment": {"amount": amount, "memo": memo, }},
         )
 
