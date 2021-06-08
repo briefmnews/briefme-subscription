@@ -490,9 +490,9 @@ class ChargifyHelper(object):
         )
 
     def set_subscription_payment_collection_method(self, subscription_id, value):
-        if value not in ("automatic", "invoice"):
+        if value not in ("automatic", "remittance"):
             raise ValueError(
-                "The payment collection method must be 'automatic' or invoice"
+                "The payment collection method must be 'automatic' or 'remittance'"
             )
         self.chargify_python.subscriptions.update(
             subscription_id=subscription_id,
