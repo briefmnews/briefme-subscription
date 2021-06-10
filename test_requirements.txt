@@ -1,7 +1,7 @@
 -e git://github.com/briefmnews/briefme-test-user.git@master#egg=briefme_test_user
 
 -r requirements.txt
-Django==2.2.23
+Django==2.2.24
 ipdb==0.13.9
 psycopg2-binary==2.8.6
 pytest==6.2.4
