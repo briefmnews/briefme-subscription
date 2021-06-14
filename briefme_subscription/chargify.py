@@ -1,8 +1,5 @@
 import datetime
 import logging
-from hashlib import sha1
-import hmac
-import urllib.request, urllib.parse, urllib.error
 import sys
 
 from django.conf import settings
@@ -10,7 +7,6 @@ from django.conf import settings
 import requests
 
 from libs.chargify_python import ChargifyNotFoundError, ChargifyUnprocessableEntityError
-from nonce.models import Nonce
 
 logger = logging.getLogger(__name__)
 
@@ -503,79 +499,6 @@ class ChargifyHelper(object):
         self.chargify_python.subscriptions.override.update(
             subscription_id=subscription_id, data={"subscription": {"expires_at": ""}}
         )
-
-    def get_chargify_direct_signature(self, timestamp, nonce, *args):
-        api_id = settings.CHARGIFY_DIRECT_API_ID
-        secret = settings.CHARGIFY_DIRECT_API_SECRET
-        data = "".join([str(x) for x in args])
-        value = "{api_id}{timestamp}{nonce}{data}".format(
-            api_id=api_id, timestamp=timestamp, nonce=nonce, data=data
-        )
-
-        return hmac.new(secret.encode("UTF-8"), value.encode("UTF-8"), sha1).hexdigest()
-
-    def chargify_direct_secure_initial(self, redirect_uri, data=None):
-        """
-        Initiate Chargify Direct Secure Parameters.
-
-        https://docs.chargify.com/chargify-direct-introduction#secure-parameters
-        """
-        if data is None:
-            data = {}
-
-        data["redirect_uri"] = redirect_uri
-        data = urllib.parse.urlencode(data)
-
-        nonce = Nonce.new("chargify")
-        nonce.save()
-
-        return {
-            "secure_api_id": settings.CHARGIFY_DIRECT_API_ID,
-            "secure_nonce": nonce.value,
-            "secure_timestamp": nonce.timestamp,
-            "secure_data": data,
-            "secure_signature": self.get_chargify_direct_signature(
-                nonce.timestamp, nonce.value, data
-            ),
-        }
-
-    def chargify_direct_callback_is_valid(self, request):
-        """
-        Check Chargify Direct Response Parameters.
-
-        https://docs.chargify.com/chargify-direct-introduction#response-parameters
-        """
-        api_id = request.GET["api_id"]
-
-        if api_id != settings.CHARGIFY_DIRECT_API_ID:
-            return False
-
-        try:
-            nonce = Nonce.objects.get(
-                service="chargify",
-                value=request.GET["nonce"],
-                timestamp=request.GET["timestamp"],
-            )
-        except (Nonce.DoesNotExist, Nonce.MultipleObjectsReturned):
-            return False
-
-        if nonce.expired:
-            return False
-
-        nonce.delete()
-
-        local_signature = self.get_chargify_direct_signature(
-            nonce.timestamp,
-            nonce.value,
-            request.GET["status_code"],
-            request.GET["result_code"],
-            request.GET["call_id"],
-        )
-
-        if request.GET["signature"] == local_signature:
-            return True
-
-        return False
 
     def get_chargify_api_call(self, call_id):
         """
