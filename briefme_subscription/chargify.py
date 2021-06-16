@@ -311,7 +311,12 @@ class ChargifyHelper(object):
         """
         self.chargify_python.invoices.payments.create(
             invoice_uid=invoice_uid,
-            data={"payment": {"amount": amount, "memo": memo, }},
+            data={
+                "payment": {
+                    "amount": amount,
+                    "memo": memo,
+                }
+            },
         )
 
     def get_subscription_statements(self, subscription_id):

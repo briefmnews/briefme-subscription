@@ -102,7 +102,9 @@ class TestChargifyJsPaymentForm:
     @pytest.mark.usefixtures("mock_chargify_helper")
     @pytest.mark.parametrize("state", ["trialing", "trial_ended", "canceled"])
     @pytest.mark.parametrize("payment_method", ["credit_card", "paypal"])
-    def test_create_payment_profile_works(self, state, subscription_with_state, payment_method):
+    def test_create_payment_profile_works(
+        self, state, subscription_with_state, payment_method
+    ):
         # GIVEN
         data = {"chargify_token": "dummy-token", "country": "FR", "zip": "75000"}
         request = {"user": subscription_with_state.user}
