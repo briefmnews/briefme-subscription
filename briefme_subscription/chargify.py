@@ -612,6 +612,16 @@ class ChargifyHelper(object):
             subscription_id=subscription_id, qs_params={"ack": customer_id}
         )
 
+    def clear_site_data(self, cleanup_scope="customers"):
+        """
+        The “Clear Sites” API is method of allowing merchants to clear customers
+        and subscriptions or all data from a site in TEST mode only.
+        https://reference.chargify.com/v1/sites/sites-intro
+        """
+        self.chargify_python.sites.clear_data.create(
+            qs_params={"cleanup_scope": cleanup_scope}
+        )
+
 
 class ProductsDict(dict):
     """
