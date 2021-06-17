@@ -4,9 +4,12 @@ import datetime
 from dateutil.parser import parse
 from decimal import Decimal, DecimalException
 
+from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.contrib.auth import get_user_model
+from django.core import signing
 from django.db import models
+from django.shortcuts import reverse
 
 from model_utils.models import TimeStampedModel
 from model_utils import Choices
@@ -237,8 +240,40 @@ class ChargifySubscription(TimeStampedModel):
         return self.state == self.STATES.past_due
 
     @property
+    def running(self):
+        return self.state in (self.STATES.trialing, self.STATES.active, self.STATES.past_due)
+
+    @property
     def pending_cancellation(self):
         return self.chargify_subscription.pending_cancellation or False
+
+    @property
+    def plan_type_name(self):
+        """To get the plan type name.
+
+        @return:  Name of the plan
+        @rtype :  str
+        """
+
+        if self.converted:
+            length = self.plan_interval_length
+            unit = self.plan_interval_unit
+
+            if unit == "month" and length == 1:
+                return "monthly"
+            elif unit == "month" and length == 12:
+                return "yearly"
+
+        return ""
+
+    @property
+    def credit_card_is_active(self):
+        try:
+            in_35_days = datetime.date.today() + datetime.timedelta(days=35)
+            return self.credit_card_expiration_date > in_35_days
+        except (ValueError, TypeError, AttributeError):
+            # Let's assume the credit card has expired then
+            return False
 
     def refresh_chargify_subscription_cache(self, chargify_subscription=None):
         self.chargify_subscription_cache = (
@@ -268,11 +303,20 @@ class ChargifySubscription(TimeStampedModel):
         if send_event and previous_state != self.STATES.trial_ended:
             self.track_reactivate_event()
 
+    def delete_payment_profile(self, payment_profile_id):
+        self.chargify_helper.delete_payment_profile(self.uuid, payment_profile_id)
+
     def track_conversion_event(self, additional_properties=None):
         pass
 
     def track_reactivate_event(self, additional_properties=None):
         pass
+
+    def generate_confirmation_url(self):
+        token = signing.dumps(self.pk, salt="account-validation")
+        path = reverse("validate-account", args=(token,))
+
+        return "{domain}{path}".format(domain=settings.SITE_DOMAIN, path=path)
 
     class ChargifyProxy:
 
